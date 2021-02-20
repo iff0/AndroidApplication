@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout android:layout_height="match_parent"
+    android:layout_width="match_parent"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".fragment.DetectFragment">
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        >
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            >
+        <!-- TODO: Update blank fragment layout -->
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/detect_frag_intro"
+            android:textColor="@color/pink"
+            android:gravity="center_horizontal"
+            android:id="@+id/detect_frag_text1"
+            android:paddingTop="20dp"
+            android:paddingBottom="30dp"
+
+            />
+        <ImageView
+            android:layout_width="360dp"
+            android:layout_marginHorizontal="15dp"
+            android:scaleType="centerCrop"
+            android:layout_height="240dp"
+            android:layout_below="@id/detect_frag_text1"
+            android:id="@+id/detect_frag_img1"
+            android:layout_centerHorizontal="true"
+            android:background="#fcfcfc"
+            android:src="@mipmap/upload_icon"
+            />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/detect_frag_img1"
+            android:weightSum="100"
+            android:gravity="center_horizontal"
+            android:paddingTop="15dp"
+            >
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/detect_frag_nonuploaded"
+                android:layout_weight="40"
+                android:enabled="false"
+                android:id="@+id/detect_frag_btn_run"
+                >
+
+            </Button>
+        </LinearLayout>
+        </RelativeLayout>
+    </ScrollView>
+
+
+</RelativeLayout>
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/floating_action_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="16dp"
+        android:src="@drawable/round_add_black_24dp"
+        app:tint="@color/white"
+        app:backgroundTint="@color/indigo_lighten_1"
+        />
+
+
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

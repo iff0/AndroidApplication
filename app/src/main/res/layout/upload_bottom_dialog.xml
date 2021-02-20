@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:padding="5dp"
+    android:background="#ffffff"
+    >
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/detect_frag_btn_upload"
+        android:layout_alignParentTop="true"
+        android:text="@string/detect_frag_upload_file"
+        style="@style/Widget.MaterialComponents.Button.TextButton.Icon"
+        android:layout_marginBottom="10dp"
+        app:icon="@drawable/round_folder_open_black_24dp"
+        app:iconGravity="textStart"
+        />
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/detect_frag_btn_upload"
+        android:id="@+id/detect_frag_btn_capture"
+        android:text="@string/detect_frag_capture"
+        style="@style/Widget.MaterialComponents.Button.TextButton"
+        app:icon="@drawable/round_image_black_24dp"
+        app:iconGravity="textStart"
+        />
+</RelativeLayout>
