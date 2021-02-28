@@ -1,28 +1,22 @@
 package com.example.project.fragment;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
-import android.content.ContentResolver;
-import android.content.Context;
+import android.app.Dialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.Matrix;
-import android.graphics.SurfaceTexture;
-import android.hardware.camera2.CameraAccessException;
-import android.hardware.camera2.CameraCaptureSession;
-import android.hardware.camera2.CameraDevice;
-import android.hardware.camera2.CameraManager;
-import android.hardware.camera2.CaptureRequest;
+import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.camera.core.CameraX;
-import androidx.camera.core.Preview;
-import androidx.camera.core.impl.PreviewConfig;
+import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
@@ -30,31 +24,49 @@ import androidx.fragment.app.Fragment;
 
 import android.provider.MediaStore;
 import android.util.Log;
-import android.util.Rational;
-import android.util.Size;
+import android.view.Display;
+import android.view.Gravity;
 import android.view.LayoutInflater;
-import android.view.Surface;
-import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
+import android.view.WindowMetrics;
 import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.Toast;
+import android.widget.TextView;
 
 import com.example.project.MainActivity;
 import com.example.project.R;
 import com.example.project.UploadBottomDialog;
+import com.example.project.entity.TestFrameA;
+import com.example.project.utils.AppConfig;
+import com.example.project.utils.Base64BitmapUtil;
+import com.github.chrisbanes.photoview.PhotoView;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
 import com.yalantis.ucrop.UCrop;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.Date;
+import java.util.Map;
 import java.util.Objects;
 
-import static android.app.Activity.RESULT_OK;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.FormBody;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
 
 
 public class DetectFragment extends Fragment {
@@ -64,10 +76,11 @@ public class DetectFragment extends Fragment {
     private Bitmap rawImg;
     private FloatingActionButton btn3;
     private Button btn_run;
-
+    private Dialog dialog;
     private Uri tmp_capture;
     public DetectFragment() {
         // Required empty public constructor
+
     }
 
     @Override
@@ -89,12 +102,28 @@ public class DetectFragment extends Fragment {
                 new UploadBottomDialog().show(Objects.requireNonNull(getActivity()).getSupportFragmentManager(), "tag");
             }
         });
+        img1.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                new UploadBottomDialog().show(Objects.requireNonNull(getActivity()).getSupportFragmentManager(), "tag");
+                return false;
+            }
+        });
         img1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                new UploadBottomDialog().show(Objects.requireNonNull(getActivity()).getSupportFragmentManager(), "tag");
+                showPhotoPreview();
             }
         });
+        btn_run.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                testApi2();
+
+            }
+        });
+        dialog = new Dialog(getActivity(), R.style.FullScreenDialog);
+
     }
 
 
@@ -152,4 +181,27 @@ public class DetectFragment extends Fragment {
     public Uri getTmpCapture() {
         return tmp_capture;
     }
+
+    @SuppressLint("ResourceAsColor")
+    private void showPhotoPreview() {
+        Log.d("DEBUG", ".....START showPhotoPreview.....");
+        if (rawImg != null) {
+            View v = getActivity().getLayoutInflater().inflate(R.layout.photo_view_preview, null, false);
+            PhotoView pv = v.findViewById(R.id.photo_view);
+            pv.setImageBitmap(rawImg);
+            dialog.setContentView(v);
+            WindowManager.LayoutParams attributes = getActivity().getWindow().getAttributes();
+            attributes.width = WindowManager.LayoutParams.MATCH_PARENT;
+            attributes.height = WindowManager.LayoutParams.MATCH_PARENT;
+            //dialog.getWindow().setAttributes(attributes);
+            pv.setOnClickListener(v1 -> dialog.dismiss());
+            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+            dialog.show();
+        }
+    }
+
+    private void testApi2() {
+
+    }
+
 }

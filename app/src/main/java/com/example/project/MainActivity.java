@@ -19,10 +19,12 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Toast;
 
 import com.example.project.fragment.DetectFragment;
 import com.example.project.fragment.HistoryFragment;
 import com.example.project.fragment.HomeFragment;
+import com.example.project.utils.DataCleanUtil;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.yalantis.ucrop.UCrop;
@@ -52,12 +54,8 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         initUI();
         initListener();
-        mContext=getContext();
     }
 
-    public static Context getContext(){
-        return mContext;
-    }
     private void initListener() {
         mBottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override
@@ -86,6 +84,11 @@ public class MainActivity extends AppCompatActivity {
                     case R.id.about_us:
                         Intent i = new Intent(MainActivity.this, AboutUsActivity.class);
                         startActivity(i);
+                        return true;
+                    case R.id.clear_cache:
+                        DataCleanUtil.cleanInternalCache(MainActivity.this);
+                        Toast toast = Toast.makeText(MainActivity.this, "已清除缓存",Toast.LENGTH_LONG);
+                        toast.show();
                         return true;
                     default:
                         return false;

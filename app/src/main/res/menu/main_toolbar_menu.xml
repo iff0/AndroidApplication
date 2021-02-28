@@ -10,4 +10,8 @@
         android:id="@+id/about_us"
         android:title="@string/main_toolbar_menu_about_us"
         />
+    <item
+        android:id="@+id/clear_cache"
+        android:title="@string/clear_cache"
+        />
 </menu>
