@@ -35,6 +35,7 @@ import android.view.WindowMetrics;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.project.MainActivity;
 import com.example.project.R;
@@ -42,9 +43,11 @@ import com.example.project.UploadBottomDialog;
 import com.example.project.entity.TestFrameA;
 import com.example.project.utils.AppConfig;
 import com.example.project.utils.Base64BitmapUtil;
+import com.example.project.utils.UIUtil;
 import com.github.chrisbanes.photoview.PhotoView;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.snackbar.Snackbar;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -52,37 +55,43 @@ import com.google.gson.JsonSyntaxException;
 import com.yalantis.ucrop.UCrop;
 
 import org.jetbrains.annotations.NotNull;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.FormBody;
+import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
+import okhttp3.RequestBody;
 import okhttp3.Response;
 
 
 public class DetectFragment extends Fragment {
 
+    public static final MediaType JSON=MediaType.parse("application/json; charset=utf-8");
 
     private ImageView img1;
     private Bitmap rawImg;
     private FloatingActionButton btn3;
-    private Button btn_run;
+    private Button btn_run1, btn_run2;
     private Dialog dialog;
     private Uri tmp_capture;
+    private View snackbar_bottom;
     public DetectFragment() {
         // Required empty public constructor
 
     }
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -94,7 +103,8 @@ public class DetectFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         img1 = getView().findViewById(R.id.detect_frag_img1);
-        btn_run = getView().findViewById(R.id.detect_frag_btn_run);
+        btn_run1 = getView().findViewById(R.id.detect_frag_btn_run1);
+        btn_run2 = getView().findViewById(R.id.detect_frag_btn_run2);
         btn3 = getView().findViewById(R.id.floating_action_button);
         btn3.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -109,20 +119,23 @@ public class DetectFragment extends Fragment {
                 return false;
             }
         });
-        img1.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showPhotoPreview();
+        img1.setOnClickListener(v -> showPhotoPreview());
+        btn_run1.setOnClickListener(v -> {
+            try {
+                api1();
+            } catch (JSONException e) {
+                e.printStackTrace();
             }
         });
-        btn_run.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                testApi2();
-
+        btn_run2.setOnClickListener(v -> {
+            try {
+                api2();
+            } catch (JSONException e) {
+                e.printStackTrace();
             }
         });
         dialog = new Dialog(getActivity(), R.style.FullScreenDialog);
+        snackbar_bottom = getView().findViewById(R.id.snackbar_bottom);
 
     }
 
@@ -155,8 +168,10 @@ public class DetectFragment extends Fragment {
 
     public void onPhotoUploaded(Bitmap b) {
         if (rawImg == null) {
-            btn_run.setText("开始");
-            btn_run.setEnabled(true);
+            btn_run1.setText("选项1: 目标检测");
+            btn_run1.setEnabled(true);
+            btn_run2.setText("选项2: 图像识别");
+            btn_run2.setEnabled(true);
         }
         rawImg = b;
         img1.setImageBitmap(b);
@@ -200,8 +215,89 @@ public class DetectFragment extends Fragment {
         }
     }
 
-    private void testApi2() {
+    private void api1() throws JSONException {
+        OkHttpClient client = new OkHttpClient();
+        final String api1Uri = AppConfig.API1_ADDR;
+        JSONObject json = new JSONObject();
+        json.put("ImageBase64", Base64BitmapUtil.bitmapToBase64(rawImg));
+        RequestBody requestBody = RequestBody.create(JSON, String.valueOf(json));
+        final Request request = new Request.Builder()
+                .url(AppConfig.serverAddress() + "/" + api1Uri)
+                .post(requestBody)
+                .build();
+        Call call = client.newCall(request);
+        call.enqueue(new Callback() {
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                getActivity().runOnUiThread(() ->
+                        UIUtil.tempSnackbar(snackbar_bottom, e.getMessage()));
+            }
 
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                Gson gson = new Gson();
+                Map map = gson.fromJson(response.body().string(), HashMap.class);
+                //System.out.println(map.keySet());
+                int code = ((Double) map.get("code")).intValue();
+                if (code == 200) {
+                    Map data = (Map) map.get("data");
+                    String img = (String) data.get("detectedImage");
+                    int tim = ((Double) data.get("processingTime")).intValue();
+                    getActivity().runOnUiThread(() -> {
+                        ImageView v = getView().findViewById(R.id.detect_frag_img2);
+                        v.setImageBitmap(Base64BitmapUtil.base64ToBitmap(img));
+                        UIUtil.tempSnackbar(snackbar_bottom, "处理耗时" + tim + "ms");
+                    });
+                }
+                else {
+                    getActivity().runOnUiThread(() ->
+                            UIUtil.tempSnackbar(snackbar_bottom, "Got ResponseCode" + code));
+                }
+            }
+        });
+    }
+
+    private void api2() throws JSONException {
+        OkHttpClient client = new OkHttpClient();
+        final String api2Uri = AppConfig.API2_ADDR;
+        JSONObject json = new JSONObject();
+        json.put("ImageBase64", Base64BitmapUtil.bitmapToBase64(rawImg));
+        RequestBody requestBody = RequestBody.create(JSON, String.valueOf(json));
+        final Request request = new Request.Builder()
+                .url(AppConfig.serverAddress() + "/" + api2Uri)
+                .post(requestBody)
+                .build();
+        Call call = client.newCall(request);
+        call.enqueue(new Callback() {
+            @Override
+            public void onFailure(@NotNull Call call, @NotNull IOException e) {
+                getActivity().runOnUiThread(() ->
+                        UIUtil.tempSnackbar(snackbar_bottom, e.getMessage()));
+            }
+
+            @Override
+            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+                Gson gson = new Gson();
+                Map map = gson.fromJson(response.body().string(), HashMap.class);
+                //System.out.println(map.keySet());
+                int code = ((Double) map.get("code")).intValue();
+                if (code == 200) {
+                    Map data = (Map) map.get("data");
+                    System.out.println(data.keySet());
+                    String img = (String) data.get("detectedImage");
+                    int tim = ((Double) data.get("processingTime")).intValue();
+                    getActivity().runOnUiThread(() -> {
+                        ImageView v = getView().findViewById(R.id.detect_frag_img2);
+                        v.setImageBitmap(Base64BitmapUtil.base64ToBitmap(img));
+                        UIUtil.tempSnackbar(snackbar_bottom, "处理耗时" + tim + "ms");
+                    });
+                }
+                else {
+                    getActivity().runOnUiThread(() ->
+                            UIUtil.tempSnackbar(snackbar_bottom, "Got ResponseCode" + code));
+                }
+            }
+        });
     }
 
 }

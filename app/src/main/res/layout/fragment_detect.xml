@@ -1,13 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:tools="http://schemas.android.com/tools"
-    android:layout_height="match_parent"
-    android:layout_width="match_parent"
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".fragment.DetectFragment">
     <ScrollView
         android:layout_width="match_parent"
@@ -46,6 +43,7 @@
             android:layout_below="@id/detect_frag_img1"
             android:weightSum="100"
             android:gravity="center_horizontal"
+            android:orientation="vertical"
             android:paddingTop="15dp"
             android:id="@+id/line1"
             >
@@ -55,7 +53,17 @@
                 android:text="@string/detect_frag_nonuploaded"
                 android:layout_weight="40"
                 android:enabled="false"
-                android:id="@+id/detect_frag_btn_run"
+                android:id="@+id/detect_frag_btn_run1"
+                >
+
+            </Button>
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/detect_frag_nonuploaded"
+                android:layout_weight="40"
+                android:enabled="false"
+                android:id="@+id/detect_frag_btn_run2"
                 >
 
             </Button>
@@ -73,19 +81,33 @@
         </RelativeLayout>
     </ScrollView>
 
-
-</RelativeLayout>
-    <com.google.android.material.floatingactionbutton.FloatingActionButton
-        android:id="@+id/floating_action_button"
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="16dp"
-        android:src="@drawable/round_add_black_24dp"
-        app:tint="@color/white"
-        app:backgroundTint="@color/indigo_lighten_1"
-        />
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        >
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/floating_action_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:src="@drawable/round_add_black_24dp"
+            app:tint="@color/white"
+            app:backgroundTint="@color/indigo_lighten_1"
+            />
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/snackbar_bottom"
+        android:layout_alignParentBottom="true"
+        >
+
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+</RelativeLayout>
 
 
 
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
