@@ -7,51 +7,35 @@ import android.app.Dialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
+import android.provider.MediaStore;
+import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.widget.Button;
+import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
-import androidx.appcompat.app.AlertDialog;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.content.FileProvider;
 import androidx.fragment.app.Fragment;
 
-import android.provider.MediaStore;
-import android.util.Log;
-import android.view.Display;
-import android.view.Gravity;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.view.Window;
-import android.view.WindowManager;
-import android.view.WindowMetrics;
-import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.TextView;
-import android.widget.Toast;
-
+import com.example.project.DetectResultActivity;
 import com.example.project.MainActivity;
 import com.example.project.R;
 import com.example.project.UploadBottomDialog;
-import com.example.project.entity.TestFrameA;
 import com.example.project.utils.AppConfig;
 import com.example.project.utils.Base64BitmapUtil;
+import com.example.project.utils.DataManageUtil;
 import com.example.project.utils.UIUtil;
 import com.github.chrisbanes.photoview.PhotoView;
-import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
 import com.google.gson.Gson;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import com.google.gson.JsonSyntaxException;
 import com.yalantis.ucrop.UCrop;
 
 import org.jetbrains.annotations.NotNull;
@@ -60,16 +44,13 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 import okhttp3.Call;
 import okhttp3.Callback;
-import okhttp3.FormBody;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -84,10 +65,11 @@ public class DetectFragment extends Fragment {
     private ImageView img1;
     private Bitmap rawImg;
     private FloatingActionButton btn3;
-    private Button btn_run1, btn_run2;
-    private Dialog dialog;
+    private Button btn_run1, btn_run2, btn_run3;
     private Uri tmp_capture;
     private View snackbar_bottom;
+    private File currentImgDir;
+
     public DetectFragment() {
         // Required empty public constructor
 
@@ -105,21 +87,29 @@ public class DetectFragment extends Fragment {
         img1 = getView().findViewById(R.id.detect_frag_img1);
         btn_run1 = getView().findViewById(R.id.detect_frag_btn_run1);
         btn_run2 = getView().findViewById(R.id.detect_frag_btn_run2);
+        btn_run3 = getView().findViewById(R.id.detect_frag_btn_run3);
         btn3 = getView().findViewById(R.id.floating_action_button);
         btn3.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                new UploadBottomDialog().show(Objects.requireNonNull(getActivity()).getSupportFragmentManager(), "tag");
+                new UploadBottomDialog().show(getActivity().getSupportFragmentManager(), "tag");
             }
         });
         img1.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
             public boolean onLongClick(View v) {
-                new UploadBottomDialog().show(Objects.requireNonNull(getActivity()).getSupportFragmentManager(), "tag");
+                new UploadBottomDialog().show(getActivity().getSupportFragmentManager(), "tag");
                 return false;
             }
         });
-        img1.setOnClickListener(v -> showPhotoPreview());
+        img1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (currentImgDir != null) {
+                    UIUtil.goToResultPage(getActivity(), currentImgDir);
+                }
+            }
+        });
         btn_run1.setOnClickListener(v -> {
             try {
                 api1();
@@ -134,7 +124,14 @@ public class DetectFragment extends Fragment {
                 e.printStackTrace();
             }
         });
-        dialog = new Dialog(getActivity(), R.style.FullScreenDialog);
+        btn_run3.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (currentImgDir != null) {
+                    UIUtil.goToResultPage(getActivity(), currentImgDir);
+                }
+            }
+        });
         snackbar_bottom = getView().findViewById(R.id.snackbar_bottom);
 
     }
@@ -145,6 +142,7 @@ public class DetectFragment extends Fragment {
         intent.setDataAndType(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,"image/*");
         //intent 待启动的Intent 100（requestCode）请求码，返回时用来区分是那次请求
         getActivity().startActivityForResult(intent ,2);
+
     }
 
     public void capturePhoto(View v) {
@@ -170,8 +168,11 @@ public class DetectFragment extends Fragment {
         if (rawImg == null) {
             btn_run1.setText("选项1: 目标检测");
             btn_run1.setEnabled(true);
+            btn_run1.setVisibility(View.VISIBLE);
             btn_run2.setText("选项2: 图像识别");
             btn_run2.setEnabled(true);
+
+            btn_run2.setVisibility(View.VISIBLE);
         }
         rawImg = b;
         img1.setImageBitmap(b);
@@ -190,7 +191,8 @@ public class DetectFragment extends Fragment {
         //op.setToolbarColor(ActivityCompat.getColor(activity, R.color.blue));
         op.setShowCropGrid(true);
         op.setCompressionQuality(100);
-         u.withOptions(op).withAspectRatio(297, 210).start(activity, MainActivity.CUT_CODE);
+        float ratio = AppConfig.getCropRatio(activity);
+         u.withOptions(op).withAspectRatio(ratio, 1F).start(activity, MainActivity.CUT_CODE);
     }
 
     public Uri getTmpCapture() {
@@ -201,17 +203,7 @@ public class DetectFragment extends Fragment {
     private void showPhotoPreview() {
         Log.d("DEBUG", ".....START showPhotoPreview.....");
         if (rawImg != null) {
-            View v = getActivity().getLayoutInflater().inflate(R.layout.photo_view_preview, null, false);
-            PhotoView pv = v.findViewById(R.id.photo_view);
-            pv.setImageBitmap(rawImg);
-            dialog.setContentView(v);
-            WindowManager.LayoutParams attributes = getActivity().getWindow().getAttributes();
-            attributes.width = WindowManager.LayoutParams.MATCH_PARENT;
-            attributes.height = WindowManager.LayoutParams.MATCH_PARENT;
-            //dialog.getWindow().setAttributes(attributes);
-            pv.setOnClickListener(v1 -> dialog.dismiss());
-            dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
-            dialog.show();
+            UIUtil.showFullScreenPhotoPreview(getActivity(), rawImg);
         }
     }
 
@@ -222,7 +214,7 @@ public class DetectFragment extends Fragment {
         json.put("ImageBase64", Base64BitmapUtil.bitmapToBase64(rawImg));
         RequestBody requestBody = RequestBody.create(JSON, String.valueOf(json));
         final Request request = new Request.Builder()
-                .url(AppConfig.serverAddress() + "/" + api1Uri)
+                .url(AppConfig.getServerAddress(getActivity()) + "/" + api1Uri)
                 .post(requestBody)
                 .build();
         Call call = client.newCall(request);
@@ -245,8 +237,10 @@ public class DetectFragment extends Fragment {
                     int tim = ((Double) data.get("processingTime")).intValue();
                     getActivity().runOnUiThread(() -> {
                         ImageView v = getView().findViewById(R.id.detect_frag_img2);
-                        v.setImageBitmap(Base64BitmapUtil.base64ToBitmap(img));
-                        UIUtil.tempSnackbar(snackbar_bottom, "处理耗时" + tim + "ms");
+                        Bitmap newImg = Base64BitmapUtil.base64ToBitmap(img);
+                        v.setImageBitmap(newImg);
+                        File imgDir = DataManageUtil.saveLocalImg(getActivity(), rawImg, newImg);
+                        onProcessedImg(imgDir, tim);
                     });
                 }
                 else {
@@ -264,7 +258,7 @@ public class DetectFragment extends Fragment {
         json.put("ImageBase64", Base64BitmapUtil.bitmapToBase64(rawImg));
         RequestBody requestBody = RequestBody.create(JSON, String.valueOf(json));
         final Request request = new Request.Builder()
-                .url(AppConfig.serverAddress() + "/" + api2Uri)
+                .url(AppConfig.getServerAddress(getActivity()) + "/" + api2Uri)
                 .post(requestBody)
                 .build();
         Call call = client.newCall(request);
@@ -288,16 +282,38 @@ public class DetectFragment extends Fragment {
                     int tim = ((Double) data.get("processingTime")).intValue();
                     getActivity().runOnUiThread(() -> {
                         ImageView v = getView().findViewById(R.id.detect_frag_img2);
-                        v.setImageBitmap(Base64BitmapUtil.base64ToBitmap(img));
-                        UIUtil.tempSnackbar(snackbar_bottom, "处理耗时" + tim + "ms");
+                        Bitmap newImg = Base64BitmapUtil.base64ToBitmap(img);
+                        v.setImageBitmap(newImg);
+                        File imgDir = DataManageUtil.saveLocalImg(getActivity(), rawImg, newImg);
+                        onProcessedImg(imgDir, tim);
                     });
                 }
                 else {
                     getActivity().runOnUiThread(() ->
-                            UIUtil.tempSnackbar(snackbar_bottom, "Got ResponseCode" + code));
+                        UIUtil.tempSnackbar(snackbar_bottom, "Got ResponseCode" + code));
                 }
             }
         });
     }
 
+
+    public void onProcessedImg(File imgDir, int tim) {
+
+        ((MainActivity) getActivity()).notifyHistoryAdded(imgDir);
+        btn_run3.setVisibility(View.VISIBLE);
+        currentImgDir = imgDir;
+        //UIUtil.tempSnackbar(snackbar_bottom, "处理耗时" + tim + "ms");
+        UIUtil.goToResultPage(getActivity(), currentImgDir, tim);
+    }
+
+    public void notifyHistoryDeleted(File imgDir) {
+        if (imgDir == currentImgDir) {
+            rawImg = null;
+            currentImgDir = null;
+            img1.setImageResource(R.mipmap.upload_icon);
+            btn_run3.setVisibility(View.INVISIBLE);
+            btn_run1.setVisibility(View.INVISIBLE);
+            btn_run2.setVisibility(View.INVISIBLE);
+        }
+    }
 }

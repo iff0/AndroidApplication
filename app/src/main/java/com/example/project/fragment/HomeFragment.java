@@ -22,6 +22,8 @@ import com.example.project.AboutUsActivity;
 import com.example.project.MainActivity;
 import com.example.project.R;
 import com.example.project.entity.TestFrameA;
+import com.example.project.optionpage.OptionCropRatioActivity;
+import com.example.project.optionpage.OptionRemoteServerActivity;
 import com.example.project.utils.AppConfig;
 import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
@@ -32,6 +34,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Objects;
 
 import okhttp3.Call;
@@ -45,8 +48,8 @@ import okhttp3.Response;
 import okio.BufferedSink;
 
 public class HomeFragment extends Fragment {
-    private ImageView img1;
-    private Button btn1, btn2, btnt1, btnt2, btnt3;
+    private View optionRemoteServerView, optionImgCropRatioView;
+
     public HomeFragment() {
         // Required empty public constructor
     }
@@ -61,56 +64,20 @@ public class HomeFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        img1 = getView().findViewById(R.id.img1);
-        btn1 = getView().findViewById(R.id.btn1);
-        btn1.setOnClickListener(this::downloadImg);
-        btn2 = getView().findViewById(R.id.btn2);
-
-        btnt1 = getView().findViewById(R.id.test1);
-        btnt2 = getView().findViewById(R.id.test2);
-        btnt3 = getView().findViewById(R.id.test3);
-
-        btnt1.setOnClickListener(this::testApi1);
-
-        btn2.setOnClickListener(v -> {
-            Intent i = new Intent(getActivity(), AboutUsActivity.class);
-            startActivity(i);
-        }
-        );
-//        String url = "https://img3.doubanio.com/view/photo/l/public/p2313017891.webp";
-//        img1 = getView().findViewById(R.id.img1);
-//        Glide.with(this).load(url).into(img1);
-    }
-
-
-    public void downloadImg(View view){
-        OkHttpClient client = new OkHttpClient();
-        final Request request = new Request.Builder()
-                .get()
-                .url("https://www.baidu.com/img/bd_logo1.png")
-                .build();
-        Call call = client.newCall(request);
-        call.enqueue(new Callback() {
-            @Override
-            public void onFailure(@NotNull Call call, @NotNull IOException e) {
-                Log.e("moer", "onFailure: ");;
-            }
-
-            @Override
-            public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
-                InputStream is = Objects.requireNonNull(response.body()).byteStream();
-
-                final Bitmap bitmap = BitmapFactory.decodeStream(is);
-                Objects.requireNonNull(getActivity()).runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        img1.setImageBitmap(bitmap);
-                    }
-                });
-
-                is.close();
-            }
+        optionRemoteServerView = getView().findViewById(R.id.option_remote_server);
+        optionImgCropRatioView = getView().findViewById(R.id.option_img_crop_ratio);
+        optionRemoteServerView.setOnClickListener((v -> {
+            Intent i = new Intent(getActivity(), OptionRemoteServerActivity.class);
+            getActivity().startActivityForResult(i, MainActivity.OPTION_REMOTE_SERVER_CODE);
+        }));
+        optionImgCropRatioView.setOnClickListener((v) -> {
+            Intent i = new Intent(getActivity(), OptionCropRatioActivity.class);
+            getActivity().startActivityForResult(i, MainActivity.OPTION_IMG_CROP_RATIO_CODE);
         });
+        ArrayList<String> opls = AppConfig.optionNames;
+        for (String s : opls) {
+            refreshOption(s);
+        }
     }
 
 
@@ -119,7 +86,7 @@ public class HomeFragment extends Fragment {
         final String api1Uri = "service/findPersonById";
         final Request request = new Request.Builder()
 
-                .url(AppConfig.serverAddress() + "/" + api1Uri)
+                .url(AppConfig.getServerAddress(getActivity()) + "/" + api1Uri)
                 .post(new FormBody.Builder()
                         .add("id", "183271657832463123")
                         .build()
@@ -139,8 +106,6 @@ public class HomeFragment extends Fragment {
                 getActivity().runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        TextView t = getView().findViewById(R.id.text3);
-                        t.setText(a);
                         Gson gson = new Gson();
                         try{
                             TestFrameA fa = gson.fromJson(a, TestFrameA.class);
@@ -153,5 +118,21 @@ public class HomeFragment extends Fragment {
                 });
             }
         });
+    }
+
+    public void refreshOption(String key) {
+        Log.d("DEBUG", "-------------------------");
+        switch (key) {
+            case "server":
+                TextView t = getView().findViewById(R.id.option_remote_server_alias);
+                t.setText("当前: " + AppConfig.getServerAlias(getActivity()));
+                break;
+            case "crop_ratio":
+                TextView tt = getView().findViewById(R.id.option_img_crop_ratio_alias);
+                tt.setText(AppConfig.getCropRatioAlias(getActivity()));
+                break;
+            default:
+                break;
+        }
     }
 }

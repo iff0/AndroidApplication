@@ -6,7 +6,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.viewpager.widget.ViewPager;
 
 import android.content.Context;
 import android.content.Intent;
@@ -24,11 +26,12 @@ import android.widget.Toast;
 import com.example.project.fragment.DetectFragment;
 import com.example.project.fragment.HistoryFragment;
 import com.example.project.fragment.HomeFragment;
-import com.example.project.utils.DataCleanUtil;
+import com.example.project.utils.DataManageUtil;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.yalantis.ucrop.UCrop;
 
+import java.io.File;
 import java.util.Objects;
 
 public class MainActivity extends AppCompatActivity {
@@ -37,16 +40,21 @@ public class MainActivity extends AppCompatActivity {
     public static final int CUT_CODE = 3;
     private static final int UPLOAD_CODE = 2;
     private static final int CAPTURE_CODE = 1;
+    public static final int OPTION_REMOTE_SERVER_CODE = 101;
+    public static final int OPTION_IMG_CROP_RATIO_CODE = 102;
 
-    private  static Context mContext;
+    private static final int[] navigation_ids = {R.id.main_bottom_navigation_home, R.id.main_bottom_navigation_detect,
+        R.id.main_bottom_navigation_history};
+
+
 
     private BottomNavigationView mBottomNavigationView;
-    private FragmentManager mFragmentManager;
-    private FragmentTransaction mTransaction;
     private HomeFragment mHomeFragment;
     private DetectFragment mDetectFragment;
     private HistoryFragment mHistoryFragment;
     private MaterialToolbar mainToolBar;
+    SlidePagerAdapter pagerAdapter;
+    private ViewPager pager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,27 +62,22 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         initUI();
         initListener();
+        if (DataManageUtil.getCacheDirSize(this) > DataManageUtil.MB * 30) {
+            DataManageUtil.cleanInternalCache(this);
+        }
     }
 
     private void initListener() {
-        mBottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(@NonNull MenuItem menuItem) {
-                //Log.d("oh", String.valueOf(menuItem.getItemId()));
-                switch (menuItem.getItemId()){
-                    case R.id.main_bottom_navigation_home:
-                        switchFragment(mHomeFragment);
-                        break;
-                    case R.id.main_bottom_navigation_detect:
-                        switchFragment(mDetectFragment);
-                        break;
-                    case R.id.main_bottom_navigation_history:
-                        switchFragment(mHistoryFragment);
-                        break;
+        mBottomNavigationView.setOnNavigationItemSelectedListener(menuItem -> {
+            int j = menuItem.getItemId();
+            for (int i = 0; i < navigation_ids.length; i++)
+                if (j == navigation_ids[i]) {
+                    pager.setCurrentItem(i);
+                    break;
                 }
-                return true;
-            }
+            return true;
         });
+
         mainToolBar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(MenuItem item) {
@@ -86,7 +89,7 @@ public class MainActivity extends AppCompatActivity {
                         startActivity(i);
                         return true;
                     case R.id.clear_cache:
-                        DataCleanUtil.cleanInternalCache(MainActivity.this);
+                        DataManageUtil.cleanInternalCache(MainActivity.this);
                         Toast toast = Toast.makeText(MainActivity.this, "已清除缓存",Toast.LENGTH_LONG);
                         toast.show();
                         return true;
@@ -96,30 +99,57 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
-    private Fragment lastFragment = null;
-    private void switchFragment(Fragment f) {
-        mTransaction = mFragmentManager.beginTransaction();
-        if (!f.isAdded()) {
-            mTransaction.add(R.id.main_frag,f);
-        } else {
-            mTransaction.show(f);
-        }
-        if (lastFragment != null && lastFragment != f){
-            mTransaction.hide(lastFragment);
-        }
-        lastFragment = f;
-        //mTransaction.replace(R.id.frag1,homeFragment);
-        mTransaction.commit();
-    }
+
     private void initUI() {
         mBottomNavigationView = findViewById(R.id.main_bottom_navigation);
-        mFragmentManager = getSupportFragmentManager();
         mHomeFragment = new HomeFragment();
         mDetectFragment = new DetectFragment();
         mHistoryFragment = new HistoryFragment();
         mainToolBar = findViewById(R.id.topAppBar);
         mBottomNavigationView.setSelectedItemId(R.id.main_bottom_navigation_detect);
-        switchFragment(mDetectFragment);
+        pager = findViewById(R.id.main_frag);
+        pagerAdapter = new SlidePagerAdapter(getSupportFragmentManager());
+        pager.setAdapter(pagerAdapter);
+        pager.setCurrentItem(1);
+        pager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {}
+            @Override
+            public void onPageScrollStateChanged(int state) {}
+            @Override
+            public void onPageSelected(int position) {
+                if (position < navigation_ids.length) {
+                    mBottomNavigationView.setSelectedItemId(navigation_ids[position]);
+                }
+            }
+        });
+    }
+
+
+    class SlidePagerAdapter extends FragmentPagerAdapter {
+        SlidePagerAdapter(FragmentManager fm) {
+            super(fm);
+        }
+
+        @Override
+        public Fragment getItem(int position) {
+
+            //进行选择1 2 3
+            if (position == 0) {
+                return mHomeFragment;
+            }
+            else if (position ==1) {
+                return mDetectFragment;
+            }
+            else {
+                return mHistoryFragment;
+            }
+        }
+
+        @Override
+        public int getCount() {
+            return navigation_ids.length;
+        }
     }
 
 
@@ -193,9 +223,23 @@ public class MainActivity extends AppCompatActivity {
                     e.printStackTrace();
                 }
                 break;
+            case OPTION_REMOTE_SERVER_CODE:
+                mHomeFragment.refreshOption("server");
+                break;
+            case OPTION_IMG_CROP_RATIO_CODE:
+                mHomeFragment.refreshOption("crop_ratio");
+                break;
             default:
                 Log.d("cameraDemo", "Unknown RequestCode");
 
         }
+    }
+
+    public void notifyHistoryAdded(File resultDir) {
+        mHistoryFragment.notifyHistoryAdded(resultDir);
+    }
+
+    public void notifyHistoryDeleted(File imgDir) {
+        mDetectFragment.notifyHistoryDeleted(imgDir);
     }
 }

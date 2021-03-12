@@ -18,6 +18,8 @@
         android:roundIcon="@mipmap/buaa_logo"
         android:supportsRtl="true"
         android:theme="@style/Theme.Project">
+        <activity android:name=".optionpage.OptionCropRatioActivity"></activity>
+        <activity android:name=".optionpage.OptionRemoteServerActivity" />
         <activity
             android:name="com.yalantis.ucrop.UCropActivity"
             android:screenOrientation="portrait"

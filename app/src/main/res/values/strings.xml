@@ -20,4 +20,16 @@
     <string name="history_abstract_default">共检测到x张邮票，共分为y类</string>
     <string name="detect_result_title">识别结果</string>
     <string name="clear_cache">清除缓存</string>
+    <string name="dialog_notice">提示</string>
+    <string name="history_frag_del_dialog_msg">请确认删除此记录</string>
+    <string name="history_frag_del_dialog_posi">删除</string>
+    <string name="history_frag_del_dialog_nega">取消</string>
+    <string name="option_remote_server_title">远程服务器</string>
+    <string name="remote_server1">123.56.137.91</string>
+    <string name="remote_server2">\???</string>
+    <string name="option_img_crop_ratio_title">图片裁剪比例</string>
+    <string name="crop_ratio1">297 : 210</string>
+    <string name="crop_ratio2">16 : 9</string>
+    <string name="crop_ratio3">1 : 1</string>
+    <string name="detect_frag_detail">查看结果</string>
 </resources>

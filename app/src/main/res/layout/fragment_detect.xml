@@ -43,27 +43,56 @@
             android:layout_below="@id/detect_frag_img1"
             android:weightSum="100"
             android:gravity="center_horizontal"
-            android:orientation="vertical"
+            android:orientation="horizontal"
             android:paddingTop="15dp"
-            android:id="@+id/line1"
+            android:id="@+id/div1"
             >
             <Button
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:text="@string/detect_frag_nonuploaded"
-                android:layout_weight="40"
+                android:layout_weight="35"
                 android:enabled="false"
                 android:id="@+id/detect_frag_btn_run1"
+                android:visibility="invisible"
                 >
 
             </Button>
+            <View
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="10"
+                >
+
+            </View>
             <Button
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:text="@string/detect_frag_nonuploaded"
-                android:layout_weight="40"
+                android:layout_weight="35"
                 android:enabled="false"
+                android:visibility="invisible"
                 android:id="@+id/detect_frag_btn_run2"
+                >
+
+            </Button>
+        </LinearLayout>
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/div2"
+            android:layout_below="@id/div1"
+            android:weightSum="100"
+            android:orientation="horizontal"
+            android:gravity="center">
+            <Button
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="80"
+                android:backgroundTint="@color/green"
+                android:id="@+id/detect_frag_btn_run3"
+                android:visibility="invisible"
+                android:text="@string/detect_frag_detail"
                 >
 
             </Button>
@@ -73,10 +102,11 @@
             android:layout_marginHorizontal="15dp"
             android:scaleType="centerCrop"
             android:layout_height="240dp"
-            android:layout_below="@id/line1"
+            android:layout_below="@id/div2"
             android:id="@+id/detect_frag_img2"
             android:layout_centerHorizontal="true"
             android:background="#fcfcfc"
+            android:visibility="gone"
             />
         </RelativeLayout>
     </ScrollView>

@@ -26,15 +26,9 @@ public class AboutUsActivity extends AppCompatActivity {
         img_vr.setOnClickListener(new ImgClicker());
         img_cs.setOnClickListener(new ImgClicker());
         img_buaa.setOnClickListener(new ImgClicker());
-
         bar = findViewById(R.id.material_toolbar);
         setSupportActionBar(bar);
-        bar.setNavigationOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                finish();
-            }
-        });
+        bar.setNavigationOnClickListener(v -> finish());
     }
 
     class ImgClicker implements View.OnClickListener {
@@ -55,7 +49,6 @@ public class AboutUsActivity extends AppCompatActivity {
                 default:
                     throw new IllegalStateException("Unexpected value: " + v.getId());
             }
-
             startActivity(new Intent(Intent.ACTION_VIEW,uri));
         }
     }

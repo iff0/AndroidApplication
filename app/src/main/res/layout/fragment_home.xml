@@ -9,70 +9,114 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center_horizontal"
-        android:text="@string/bottom_navigation_home"
+        android:gravity="left"
+        android:paddingLeft="25dp"
+        android:textSize="24sp"
+        android:textColor="@color/black"
+        android:text="设置"
+        android:textFontWeight="800"
+        android:paddingVertical="10dp"
         android:id="@+id/text1"
         />
-    <ImageView
-        android:layout_width="400dp"
-        android:layout_height="400dp"
-        android:id="@+id/img1"
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:id="@+id/option_remote_server"
+        android:orientation="horizontal"
         android:layout_below="@id/text1"
-        android:layout_marginTop="20dp"
-        android:layout_centerHorizontal="true"
+        android:background="@drawable/option_item_border"
         >
+        <RelativeLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:paddingVertical="5dp"
+            android:paddingLeft="20dp"
+            >
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/option_remote_server_title"
+                style="@style/OptionTitle"
+                android:layout_alignParentTop="true"
+                >
 
-    </ImageView>
-    <Button
+            </TextView>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=""
+                android:id="@+id/option_remote_server_alias"
+                style="@style/OptionMsg"
+                android:layout_alignParentBottom="true"
+                >
+
+            </TextView>
+        </RelativeLayout>
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginHorizontal="10dp"
+            >
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:drawableStart="@drawable/baseline_keyboard_arrow_right_black_24dp"
+                android:gravity="center"
+                android:padding="10dp"
+                >
+            </TextView>
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_above="@id/btn1"
-        android:text="@string/about_us_title"
-        android:id="@+id/btn2"
+        android:layout_height="60dp"
+        android:id="@+id/option_img_crop_ratio"
+        android:orientation="horizontal"
+        android:layout_below="@id/option_remote_server"
+        android:background="@drawable/option_item_border"
         >
-    </Button>
-    <Button
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="okhttp"
-        android:id="@+id/btn1"
-        android:layout_alignParentBottom="true"
-        >
+        <RelativeLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:paddingVertical="5dp"
+            android:paddingLeft="20dp"
+            >
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/option_img_crop_ratio_title"
+                style="@style/OptionTitle"
+                android:layout_alignParentTop="true"
+                >
 
-    </Button>
+            </TextView>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=""
+                style="@style/OptionMsg"
+                android:id="@+id/option_img_crop_ratio_alias"
+                android:layout_alignParentBottom="true"
+                >
 
-    <Button
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/text1"
-        android:text="test 1"
-        android:id="@+id/test1"
-        >
-
-    </Button>
-    <Button
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/test1"
-        android:text="test 2"
-        android:id="@+id/test2"
-        >
-
-    </Button>
-    <Button
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/test2"
-        android:text="test 3"
-        android:id="@+id/test3"
-        >
-
-    </Button>
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/test3"
-        android:id="@+id/text3">
-
-    </TextView>
+            </TextView>
+        </RelativeLayout>
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginHorizontal="10dp"
+            >
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:drawableStart="@drawable/baseline_keyboard_arrow_right_black_24dp"
+                android:gravity="center"
+                android:padding="10dp"
+                >
+            </TextView>
+        </LinearLayout>
+    </LinearLayout>
 </RelativeLayout>
