@@ -1,9 +1,13 @@
 package com.example.project.utils;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Environment;
+import android.util.Log;
+import android.view.View;
 import android.widget.Toast;
 
 import com.example.project.MainActivity;
@@ -13,8 +17,11 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 
 public class DataManageUtil {
     public static final long MB = 1024 * 1024;
@@ -130,6 +137,31 @@ public class DataManageUtil {
         FileInputStream fis = new FileInputStream(file.getAbsolutePath());
         Bitmap bitmap  = BitmapFactory.decodeStream(fis);
         return bitmap;
+    }
+
+    public static void saveImgToGalley(Context context, Bitmap bitmap, View snack) {
+        String extStorageDirectory = Environment.getExternalStorageDirectory().toString();
+        OutputStream outStream;
+        String filename;
+        Date date = new Date(System.currentTimeMillis());
+        SimpleDateFormat sdf = new SimpleDateFormat ("yyyyMMddHHmmss");
+        filename =  "buaa" + sdf.format(date);
+        File file = new File(extStorageDirectory, filename+".png");
+        //Log.d("DEBUG", "hereeeeeeeeeeee");
+        try {
+            outStream = new FileOutputStream(file);//创建输入流
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, outStream);
+            outStream.flush();
+            outStream.close();
+            Log.d("DEBUG", file.getAbsolutePath());
+            Intent intent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
+            Uri uri = Uri.fromFile(file);intent.setData(uri);
+            context.sendBroadcast(intent);
+            UIUtil.tempSnackbar(snack, "保存成功");
+        } catch(Exception e) {
+            e.printStackTrace();
+        }
+
     }
 }
 

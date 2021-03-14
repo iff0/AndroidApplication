@@ -67,7 +67,7 @@ public class DetectFragment extends Fragment {
     private FloatingActionButton btn3;
     private Button btn_run1, btn_run2, btn_run3;
     private Uri tmp_capture;
-    private View snackbar_bottom;
+    public View snackbar_bottom;
     private File currentImgDir;
 
     public DetectFragment() {
@@ -150,14 +150,11 @@ public class DetectFragment extends Fragment {
             if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
                 ActivityCompat.requestPermissions(getActivity(),
                         new String[]{Manifest.permission.CAMERA},
-                        1);
+                        MainActivity.PERMISSION_CAMERA_CODE);
             }
-            Intent i = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-            File tmp = new File(getActivity().getCacheDir(), "_" + System.currentTimeMillis() + ".jpg");
-
-            tmp_capture = FileProvider.getUriForFile(getActivity(),"com.example.project", tmp);
-            i.putExtra(MediaStore.EXTRA_OUTPUT, tmp_capture);
-            getActivity().startActivityForResult(i, 1);
+            else {
+                launchCamera();
+            }
         } catch (Exception e) {
             Log.d("cameraDemo", e.toString());
         }
@@ -315,5 +312,13 @@ public class DetectFragment extends Fragment {
             btn_run1.setVisibility(View.INVISIBLE);
             btn_run2.setVisibility(View.INVISIBLE);
         }
+    }
+
+    public void launchCamera() {
+        Intent i = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        File tmp = new File(getActivity().getCacheDir(), "_" + System.currentTimeMillis() + ".jpg");
+        tmp_capture = FileProvider.getUriForFile(getActivity(),"com.example.project", tmp);
+        i.putExtra(MediaStore.EXTRA_OUTPUT, tmp_capture);
+        getActivity().startActivityForResult(i, 1);
     }
 }

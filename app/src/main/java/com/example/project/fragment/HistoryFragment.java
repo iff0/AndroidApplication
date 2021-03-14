@@ -64,7 +64,6 @@ public class HistoryFragment extends Fragment {
     }
 
     public void notifyHistoryAdded(File resultDir) {
-
         if (!adapter.sortFromBefore) {adapter.insertItem(0, resultDir);}
         else {
             adapter.insertItem(adapter.getItemCount(), resultDir);

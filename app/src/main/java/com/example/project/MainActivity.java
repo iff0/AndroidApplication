@@ -12,6 +12,7 @@ import androidx.viewpager.widget.ViewPager;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -27,6 +28,7 @@ import com.example.project.fragment.DetectFragment;
 import com.example.project.fragment.HistoryFragment;
 import com.example.project.fragment.HomeFragment;
 import com.example.project.utils.DataManageUtil;
+import com.example.project.utils.UIUtil;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.yalantis.ucrop.UCrop;
@@ -42,6 +44,9 @@ public class MainActivity extends AppCompatActivity {
     private static final int CAPTURE_CODE = 1;
     public static final int OPTION_REMOTE_SERVER_CODE = 101;
     public static final int OPTION_IMG_CROP_RATIO_CODE = 102;
+    public static final int PERMISSION_CAMERA_CODE = 601;
+
+    public static final int PERMISSION_SAVE_IMG_TO_GALLEY_CODE = 602;
 
     private static final int[] navigation_ids = {R.id.main_bottom_navigation_home, R.id.main_bottom_navigation_detect,
         R.id.main_bottom_navigation_history};
@@ -232,6 +237,26 @@ public class MainActivity extends AppCompatActivity {
             default:
                 Log.d("cameraDemo", "Unknown RequestCode");
 
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == PERMISSION_CAMERA_CODE) {
+            boolean okay = true;
+            for (int i : grantResults) {
+                if (i != PackageManager.PERMISSION_GRANTED) {
+                    okay = false;
+                    break;
+                }
+            }
+            if (okay) {
+                mDetectFragment.launchCamera();
+            }
+            else {
+                UIUtil.tempSnackbar(mDetectFragment.snackbar_bottom, "相机授权失败");
+            }
         }
     }
 
