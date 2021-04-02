@@ -48,6 +48,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -168,8 +169,8 @@ public class DetectFragment extends Fragment {
             btn_run1.setVisibility(View.VISIBLE);
             btn_run2.setText("选项2: 图像识别");
             btn_run2.setEnabled(true);
-
             btn_run2.setVisibility(View.VISIBLE);
+            btn_run3.setVisibility(View.INVISIBLE);
         }
         rawImg = b;
         img1.setImageBitmap(b);
@@ -205,7 +206,12 @@ public class DetectFragment extends Fragment {
     }
 
     private void api1() throws JSONException {
-        OkHttpClient client = new OkHttpClient();
+        OkHttpClient client = new OkHttpClient.Builder()
+                .connectTimeout(30, TimeUnit.SECONDS)
+                .readTimeout(60, TimeUnit.SECONDS)
+                .writeTimeout(60, TimeUnit.SECONDS)
+                .build();
+
         final String api1Uri = AppConfig.API1_ADDR;
         JSONObject json = new JSONObject();
         json.put("ImageBase64", Base64BitmapUtil.bitmapToBase64(rawImg));
@@ -249,7 +255,11 @@ public class DetectFragment extends Fragment {
     }
 
     private void api2() throws JSONException {
-        OkHttpClient client = new OkHttpClient();
+        OkHttpClient client = new OkHttpClient.Builder()
+            .connectTimeout(30, TimeUnit.SECONDS)
+            .readTimeout(60, TimeUnit.SECONDS)
+            .writeTimeout(60, TimeUnit.SECONDS)
+            .build();
         final String api2Uri = AppConfig.API2_ADDR;
         JSONObject json = new JSONObject();
         json.put("ImageBase64", Base64BitmapUtil.bitmapToBase64(rawImg));
